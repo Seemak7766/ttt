@@ -4,7 +4,7 @@ from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 from html import escape
 from chatbot import ChatbotError, run_agent, summarize_conversation
-from config import load_kakao_rest_api_key
+from config import load_kakao_rest_api_key, configuration_status, APP_BUILD
 from travel_plan import PLAN_FORMAT_VERSION, build_travel_plan, collect_plan_evidence, recommend_travel_plan
 from weather_forecast import trip_duration_days
 from plan_actions import handle_plan_question
@@ -19,6 +19,18 @@ KST = timezone(timedelta(hours=9))
 st.markdown("<style>" + (Path(__file__).resolve().parent / "static" / "travel_theme.css").read_text(encoding="utf-8") + "</style>", unsafe_allow_html=True)
 st.markdown("""
 <style>
+/* Cloud에서 외부 CSS 파일이 이전 버전이어도 읽을 수 있도록 보정합니다. */
+html body .stApp [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"],
+html body .stApp [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] p,
+html body .stApp [data-testid="stChatMessage"] .question-text,
+html body .stApp [data-testid="stWidgetLabel"] p,
+html body .stApp [data-testid="stTextArea"] label p {
+    color: #edf5f0 !important;
+}
+html body .stApp [data-testid="stTextArea"] textarea {
+    color: #edf5f0 !important;
+    -webkit-text-fill-color: #edf5f0 !important;
+}
 /* 비교표의 메뉴/유형 열을 한 줄로 유지합니다. */
 [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] table th:first-child,
 [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] table td:first-child {
@@ -149,6 +161,11 @@ with st.sidebar:
     if not compact:
         st.caption("대화는 현재 브라우저 세션 동안 유지됩니다. 새로고침하면 초기화될 수 있습니다.")
         st.caption("카카오맵 장소 검색 사용 가능" if load_kakao_rest_api_key() else "카카오맵 장소 검색 키가 설정되지 않았습니다.")
+        with st.expander("배포 설정 확인", expanded=False):
+            st.caption(f"앱 버전: {APP_BUILD}")
+            for variable, status in configuration_status().items():
+                st.write(f"{variable}: {status}")
+            st.caption("키 값은 표시하지 않습니다. 설정 여부는 인증 성공 여부와 다릅니다.")
 
 st.markdown("<style>" + "\n".join(sidebar_tooltips) + "</style>", unsafe_allow_html=True)
 

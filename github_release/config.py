@@ -3,6 +3,33 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 DEFAULT_MODEL = "gpt-4o-mini"
+APP_BUILD = "2026.10.21-cloud-fix-2"
+
+
+def configuration_status():
+    """키 원문·길이·일부 문자열을 반환하지 않는 배포 진단."""
+    load_dotenv(Path(__file__).resolve().parent / ".env", override=True)
+    cloud, error = {}, False
+    try:
+        import streamlit as st
+        cloud = st.secrets.to_dict()
+    except Exception:
+        error = True
+    def nested_has(node, name):
+        if not isinstance(node, dict):
+            return False
+        return bool(node.get(name)) or any(nested_has(v, name) for v in node.values() if isinstance(v, dict))
+    status = {}
+    for name in ("OPENAI_API_KEY", "KAKAO_REST_API_KEY", "LANGSMITH_API_KEY"):
+        if os.getenv(name, "").strip():
+            status[name] = "설정됨 · 환경 변수/.env"
+        elif isinstance(cloud.get(name), str) and cloud[name].strip():
+            status[name] = "설정됨 · Secrets 최상위"
+        elif nested_has(cloud, name):
+            status[name] = "설정 위치 오류 · Secrets 최상위로 옮겨 주세요"
+        else:
+            status[name] = "없음 · Secrets를 읽지 못했거나 설정되지 않음" if error else "없음 · Secrets에 추가해 주세요"
+    return status
 
 
 def _cloud_value(name):
