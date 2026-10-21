@@ -116,7 +116,7 @@ def answer_question(
     try:
         api_key, model = load_settings()
         if not api_key:
-            raise ChatbotError(".env 파일에 OPENAI_API_KEY를 설정해 주세요.")
+            raise ChatbotError("OPENAI_API_KEY를 설정해 주세요. 로컬은 .env, 배포 환경은 앱 설정의 Secrets를 확인해 주세요.")
         client = ChatOpenAI(model=model, api_key=api_key, timeout=45, max_retries=0)
         if weather_request and weather_check["status"] == "ready":
             kakao_key = load_kakao_rest_api_key()
