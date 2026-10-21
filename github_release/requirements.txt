@@ -1,0 +1,7 @@
+streamlit>=1.66,<2
+langchain-openai>=1.0,<2
+python-dotenv>=1.0,<2
+httpx>=0.28,<1
+folium>=0.20,<1
+streamlit-folium>=0.25,<1
+langsmith>=0.4,<1

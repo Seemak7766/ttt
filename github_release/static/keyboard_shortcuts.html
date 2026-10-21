@@ -1,0 +1,25 @@
+<script>
+// Streamlit이 화면을 다시 그려도 문서의 단일 리스너를 유지합니다.
+const doc = window.parent.document;
+const listenerKey = "__travelChatKeyboardHandler";
+if (doc[listenerKey]) doc.removeEventListener("keydown", doc[listenerKey], true);
+doc[listenerKey] = (event) => {
+  const input = event.target;
+  if (input.tagName !== "TEXTAREA" || input.getAttribute("aria-label") !== "여행 질문") return;
+  if (event.key !== "Enter" || event.isComposing || event.keyCode === 229) return;
+  // Alt+Enter는 textarea의 기본 줄바꿈을 허용하고 Streamlit 단축키만 막습니다.
+  event.stopImmediatePropagation();
+  if (event.altKey) return;
+  event.preventDefault();
+  if (event.repeat) return;
+  const form = input.closest('[data-testid="stForm"]');
+  const submit = form?.querySelector('[data-testid="stFormSubmitButton"] button');
+  if (!submit || submit.disabled) return;
+  // blur로 최신 입력을 반영한 후 폼을 제출합니다.
+  input.blur();
+  window.parent.setTimeout(() => {
+    if (submit.isConnected && !submit.disabled) submit.click();
+  }, 0);
+};
+doc.addEventListener("keydown", doc[listenerKey], true);
+</script>
